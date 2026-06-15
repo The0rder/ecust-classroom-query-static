@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#18392f">
+  <title>今日空教室</title>
+  <link rel="stylesheet" href="./assets/css/app.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <img src="./assets/img/schedule-mark.svg" alt="" class="brand-mark" aria-hidden="true">
+      <span>ECUST Classroom</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="title-band" aria-labelledby="page-title">
+      <div class="content-width title-row">
+        <div>
+          <p class="date-line" id="date-line">正在读取教学周</p>
+          <h1 id="page-title">今日空教室</h1>
+        </div>
+        <div class="live-mark"><span></span>静态课表</div>
+      </div>
+    </section>
+
+    <section class="control-section" aria-labelledby="time-title">
+      <div class="content-width">
+        <div class="section-heading time-heading">
+          <h2 id="time-title">时间段</h2>
+          <output id="time-output">--:-- - --:--</output>
+        </div>
+        <div class="range-control" id="range-control">
+          <div class="range-rail" aria-hidden="true"><div class="range-fill"></div></div>
+          <input id="period-start" type="range" min="1" max="12" value="1" aria-label="开始节次">
+          <input id="period-end" type="range" min="1" max="12" value="12" aria-label="结束节次">
+        </div>
+        <div class="time-scale" aria-hidden="true">
+          <div class="time-ticks">
+            <i></i><i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="time-labels">
+            <span style="--position: 0%">08:00</span>
+            <span style="--position: 36.36%">13:30</span>
+            <span style="--position: 72.72%">18:00</span>
+            <span style="--position: 100%">21:20</span>
+          </div>
+        </div>
+        <div class="range-meta">
+          <span id="start-label">第1节</span>
+          <span id="period-summary">全天 · 12节</span>
+          <span id="end-label">第12节</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="control-section building-section" aria-labelledby="building-title">
+      <div class="content-width">
+        <div class="section-heading">
+          <h2 id="building-title">教学楼</h2>
+          <span class="section-note" id="campus-name">奉贤校区</span>
+        </div>
+        <div class="building-grid" id="building-grid" role="group" aria-label="选择教学楼">
+          <button type="button" class="building-button is-active" data-building="A" aria-pressed="true">A教</button>
+          <button type="button" class="building-button" data-building="B" aria-pressed="false">B教</button>
+          <button type="button" class="building-button" data-building="C" aria-pressed="false">C教</button>
+          <button type="button" class="building-button" data-building="D" aria-pressed="false">D教</button>
+          <button type="button" class="building-button" data-building="E" disabled aria-disabled="true">
+            <span>E教</span><small>修缮中</small>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="results-section" aria-labelledby="results-title">
+      <div class="content-width">
+        <div class="section-heading results-heading">
+          <div>
+            <h2 id="results-title">A教空教室</h2>
+            <p id="results-subtitle">正在读取课表</p>
+          </div>
+          <strong class="room-count" id="room-count">--</strong>
+        </div>
+        <div id="results" class="room-results" aria-live="polite">
+          <div class="loading-row"><span></span>正在加载静态数据</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="page-footer">
+      <p id="data-version">课表数据加载中</p>
+    </footer>
+  </main>
+
+  <script src="./data/config.js"></script>
+  <script src="./assets/js/app.js" defer></script>
+</body>
+</html>
