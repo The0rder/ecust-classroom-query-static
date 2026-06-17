@@ -170,10 +170,15 @@
       <section class="floor-group">
         <h3>${escapeHtml(floor)}<span>${items.length}间</span></h3>
         <div class="room-grid">
-          ${items.map((room) => `<div class="room-item">${escapeHtml(room.room)}</div>`).join('')}
+          ${items.map((room) => `<div class="room-item" data-room="${escapeHtml(room.room)}" tabindex="0" role="button" aria-label="查看${escapeHtml(room.room)}课表">${escapeHtml(room.room)}</div>`).join('')}
         </div>
       </section>
     `).join('');
+
+    elements.results.querySelectorAll('.room-item').forEach((item) => {
+      item.addEventListener('click', () => openSchedule(item.dataset.room));
+      item.addEventListener('keydown', (e) => { if (e.key === 'Enter') openSchedule(item.dataset.room); });
+    });
   }
 
   function todayContext(config) {
@@ -242,6 +247,67 @@
     elements.count.textContent = '--';
     elements.resultsSubtitle.textContent = '数据不可用';
     elements.results.innerHTML = `<div class="empty-state error">${escapeHtml(message)}</div>`;
+  }
+
+  function formatPeriodTime(index) {
+    const periods = state.config.periods;
+    if (index < 0 || index >= periods.length) return '--:--';
+    return periods[index][0] + ' - ' + periods[index][1];
+  }
+
+  function openSchedule(roomName) {
+    const data = state.buildingCache.get(state.building);
+    if (!data || !state.context) return;
+    const room = data.rooms.find((r) => r[0] === roomName);
+    if (!room) return;
+
+    const weekBit = 2 ** (state.context.week - 1);
+    const todayEvents = room[2].filter((event) => {
+      const [weekday, , , weekMask] = event;
+      const activeWeek = Math.floor(weekMask / weekBit) % 2 === 1;
+      const activeDay = weekday === 0 || weekday === state.context.weekday;
+      return activeWeek && activeDay;
+    }).sort((a, b) => a[1] - b[1]);
+
+    const building = state.config.buildings.find((b) => b.key === state.building);
+    const buildingLabel = building ? building.label : state.building + '教';
+
+    let scheduleHtml;
+    if (todayEvents.length === 0) {
+      scheduleHtml = '<p class="schedule-empty">今天无课程安排</p>';
+    } else {
+      scheduleHtml = '<ul class="schedule-list">' + todayEvents.map((event) => {
+        const content = event[4] || '（无课程名）';
+        return `<li>
+          <span class="schedule-time">${formatPeriodTime(event[1] - 1)} ~ ${formatPeriodTime(event[2] - 1)}</span>
+          <span class="schedule-content">${escapeHtml(content)}</span>
+        </li>`;
+      }).join('') + '</ul>';
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'schedule-modal-overlay';
+    modal.innerHTML = `<div class="schedule-modal" role="dialog" aria-label="${escapeHtml(roomName)}课表">
+      <div class="schedule-modal-header">
+        <h2>${escapeHtml(buildingLabel)} ${escapeHtml(roomName)}</h2>
+        <p>${state.context.weekdayName} · 第${state.context.week}周</p>
+        <button class="schedule-modal-close" aria-label="关闭">&times;</button>
+      </div>
+      <div class="schedule-modal-body">${scheduleHtml}</div>
+    </div>`;
+    document.body.appendChild(modal);
+
+    const close = () => {
+      modal.classList.add('is-closing');
+      setTimeout(() => modal.remove(), 200);
+      document.removeEventListener('keydown', escHandler);
+    };
+    const escHandler = (e) => { if (e.key === 'Escape') close(); };
+
+    modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+    modal.querySelector('.schedule-modal-close').addEventListener('click', close);
+    document.addEventListener('keydown', escHandler);
+    requestAnimationFrame(() => modal.classList.add('is-open'));
   }
 
   function escapeHtml(value) {
